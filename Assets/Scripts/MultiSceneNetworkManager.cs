@@ -1,3 +1,6 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Mirror;
@@ -9,6 +12,8 @@ using Mirror;
 
 public class MultiSceneNetworkManager : NetworkManager
 {
+    public static new MultiSceneNetworkManager singleton;
+
     #region Unity Callbacks
 
     public override void OnValidate()
@@ -32,6 +37,7 @@ public class MultiSceneNetworkManager : NetworkManager
     public override void Start()
     {
         base.Start();
+        singleton = this;
     }
 
     /// <summary>
@@ -135,6 +141,7 @@ public class MultiSceneNetworkManager : NetworkManager
     /// <param name="conn">Connection from client.</param>
     public override void OnServerReady(NetworkConnection conn)
     {
+        conn.Send(new SceneMessage { sceneName = "MainMenu", sceneOperation = SceneOperation.LoadAdditive });
         base.OnServerReady(conn);
     }
 
@@ -207,7 +214,17 @@ public class MultiSceneNetworkManager : NetworkManager
     /// This is invoked when a server is started - including when a host is started.
     /// <para>StartServer has multiple signatures, but they all cause this hook to be called.</para>
     /// </summary>
-    public override void OnStartServer() { }
+    public override void OnStartServer() 
+    {
+      ServerLoadMainMenuScene();
+    }
+
+    private void ServerLoadMainMenuScene()
+    {
+      Scene mainMenuScene = SceneManager.LoadScene(1, new LoadSceneParameters { loadSceneMode = LoadSceneMode.Additive, localPhysicsMode = LocalPhysicsMode.Physics3D });
+      if (!mainMenuScene.IsValid()) Debug.Log($"Error loading main menu scene on server startup.");
+      Debug.Log($"Loaded main menu scene. Scene is name: {mainMenuScene.name} | Loaded scene count: {SceneManager.sceneCount}");
+    }
 
     /// <summary>
     /// This is invoked when the client is started.
@@ -230,4 +247,24 @@ public class MultiSceneNetworkManager : NetworkManager
     public override void OnStopClient() { }
 
     #endregion
+
+    public void MovePlayerToMainMenu(GameObject player)
+    {
+        SceneManager.MoveGameObjectToScene(player, SceneManager.GetSceneByBuildIndex(1));
+    }
+
+    public void MovePLayerToGameAndUnloadMainMenu(GameObject player)
+    {
+        StartCoroutine(StartGame(player));
+    }
+
+    IEnumerator StartGame(GameObject player)
+    {
+        AsyncOperation loadingScene = SceneManager.LoadSceneAsync(2, new LoadSceneParameters { loadSceneMode = LoadSceneMode.Additive, localPhysicsMode = LocalPhysicsMode.Physics3D });
+        while (!loadingScene.isDone) yield return null;
+        SceneManager.MoveGameObjectToScene(player, SceneManager.GetSceneByBuildIndex(2));
+        NetworkConnection conn = player.GetComponent<NetworkTransform>().connectionToClient;
+        conn.Send(new SceneMessage { sceneName = "MainMenu", sceneOperation = SceneOperation.UnloadAdditive });
+        conn.Send(new SceneMessage { sceneName = "Game", sceneOperation = SceneOperation.LoadAdditive });
+    }
 }

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2397908361117167628}
   - component: {fileID: -2393305680310031661}
   - component: {fileID: -8071878740131384617}
+  - component: {fileID: 6351607938562415149}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -112,8 +113,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 776077e2d1dc94742bff63ac6d19d52a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dontDestroyOnLoad: 1
-  PersistNetworkManagerToOfflineScene: 0
+  dontDestroyOnLoad: 0
+  PersistNetworkManagerToOfflineScene: 1
   runInBackground: 1
   autoStartServerBuild: 1
   serverTickRate: 30
@@ -130,4 +131,17 @@ MonoBehaviour:
   playerPrefab: {fileID: 9067933444303112936, guid: 16497b07d06024ecab4b83f219649e78, type: 3}
   autoCreatePlayer: 1
   playerSpawnMethod: 0
-  spawnPrefabs: []
+  spawnPrefabs:
+  - {fileID: 244339277435417762, guid: bf1e1d55a84644c73a9eb8996a6bf5bb, type: 3}
+--- !u!114 &6351607938562415149
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 700120008116804982}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ff2086ce12c5499daca09d96bc0d110, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
